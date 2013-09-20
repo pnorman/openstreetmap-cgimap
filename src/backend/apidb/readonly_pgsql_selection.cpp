@@ -480,6 +480,26 @@ readonly_pgsql_selection::factory::factory(const po::variables_map &opts)
   m_connection.prepare("visible_relation",
     "SELECT visible FROM current_relations WHERE id = $1")("bigint");
 
+  m_connection.prepare("extract_nodes",
+    "SELECT n.id, n.latitude, n.longitude, n.visible, "
+        "to_char(n.timestamp,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS timestamp, "
+        "n.changeset_id, n.version "
+      "FROM current_nodes n "
+      "WHERE n.id = ANY($1)")
+    ("bigint[]");
+  m_connection.prepare("extract_ways",
+    "SELECT w.id, w.visible, w.version, w.changeset_id, "
+        "to_char(w.timestamp,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS timestamp "
+      "FROM current_ways w "
+      "WHERE w.id = ANY($1)")
+    ("bigint[]");
+  m_connection.prepare("extract_relations",
+     "SELECT r.id, r.visible, r.version, r.changeset_id, "
+        "to_char(r.timestamp,'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS timestamp "
+      "FROM current_relations r "
+      "WHERE r.id = ANY($1)")
+    ("bigint[]");
+
   // extraction functions for child information
   m_connection.prepare("extract_way_nds",
     "SELECT node_id "
